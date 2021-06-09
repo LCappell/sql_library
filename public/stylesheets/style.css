@@ -25,6 +25,10 @@ input[type="submit"] {
   cursor: pointer;
 }
 
+table {
+  width: 90vw;
+}
+
 form a.button,
 input[type="submit"] {
   margin-left: 140px;
