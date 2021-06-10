@@ -15,7 +15,7 @@ var app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "jade");
+app.set("view engine", "pug");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -40,21 +40,29 @@ app.use("/users", usersRouter);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   console.log("404 error handler called");
+
   const err = new Error("It looks like this page doesn't exists.");
   res.status(404);
   res.render("page-not-found", { err });
   next(err);
 });
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
+  console.log("global");
   if (err.status === 404) {
-    res.render("page-not-found", { err });
+    res.status(404).render("page-not-found", { err });
   } else {
-    console.log("500 error handler called");
-    err.status = 500;
-    err.message = "Oops! Looks like there was a problem with the server";
-    res.status(err.status).render("error", { err });
+    // set locals, only providing error in development
+    res.locals.message =
+      err.message || "Sorry! There was an unexpected error on the server.";
+    res.locals.error = req.app.get("env") === "development" ? err : {};
+    // set status
+    res.status(err.status || 500);
+    console.log(err.status, err.message);
+    // render the error page
+    res.render("error", { err });
   }
+  next(err);
 });
 
 module.exports = app;
