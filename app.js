@@ -41,28 +41,19 @@ app.use("/users", usersRouter);
 app.use((req, res, next) => {
   console.log("404 error handler called");
 
-  const err = new Error("It looks like this page doesn't exists.");
-  res.status(404);
-  res.render("page-not-found", { err });
-  next(err);
+  res.status(404).render("page-not-found");
 });
 
 app.use((err, req, res, next) => {
   console.log("global");
-  if (err.status === 404) {
-    res.status(404).render("page-not-found", { err });
-  } else {
-    // set locals, only providing error in development
-    res.locals.message =
-      err.message || "Sorry! There was an unexpected error on the server.";
-    res.locals.error = req.app.get("env") === "development" ? err : {};
-    // set status
-    res.status(err.status || 500);
-    console.log(err.status, err.message);
-    // render the error page
-    res.render("error", { err });
-  }
-  next(err);
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
+  err.status = 500;
+  // render the error page
+
+  res.status(err.status || 500);
+  res.render("error", err);
 });
 
 module.exports = app;

@@ -3,6 +3,14 @@ var router = express.Router();
 
 const Book = require("../models").Book;
 
+// Error handler
+
+const errHandler = (errStatus, msg) => {
+  const err = new Error(msg);
+  err.status = errStatus;
+  throw err;
+};
+
 // Async Handler
 
 const asyncHandler = (cb) => {
@@ -67,12 +75,12 @@ router.post(
 
 router.get(
   "/books/:id",
-  asyncHandler(async (req, res, next, err) => {
+  asyncHandler(async (req, res) => {
     const book = await Book.findByPk(req.params.id);
     if (book) {
       res.render("update-book", { book });
     } else {
-      next(err);
+      errHandler(404, "Page not found! Please try again.");
     }
   })
 );
@@ -88,7 +96,7 @@ router.post(
         await book.update(req.body);
         res.redirect("/");
       } else {
-        res.sendStatus(404);
+        errHandler(404, "Page not found!");
       }
     } catch (error) {
       if (error.name === "SequelizeValidationError") {
@@ -117,7 +125,7 @@ router.post(
       await book.destroy(req.body);
       res.redirect("/books");
     } else {
-      next(err);
+      errHandler(404, "Page not found! Please try again.");
     }
   })
 );
