@@ -45,15 +45,14 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log("global");
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
-  err.status = 500;
-  // render the error page
-
-  res.status(err.status || 500);
-  res.render("error", err);
+  if (err.status === 404) {
+    res.render("page-not-found", { err });
+  } else {
+    console.log("500 error handler called");
+    err.status = 500;
+    err.message = "Oops! Looks like there was a problem with the server";
+    res.status(err.status).render("error", { err });
+  }
 });
 
 module.exports = app;
